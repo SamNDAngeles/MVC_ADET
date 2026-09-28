@@ -1,0 +1,69 @@
+@* ===================================================================
+   LAYOUT = the shared page frame (banner + styles).
+   Every page is placed inside @RenderBody() below.
+   =================================================================== *@
+
+@inject IConfiguration Config
+@inject IWebHostEnvironment Env
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TaskTracker - @Config["AppSettings:Label"]</title>
+
+    @* Handwriting-style font, just for the sticky-pad look *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* The corkboard background */
+        body {
+            font-family: 'Kalam', 'Patrick Hand', sans-serif;
+            margin: 0;
+            background: #a9784f; /* wood/cork color */
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0,0,0,0.08) 0, transparent 12%),
+                radial-gradient(circle at 80% 60%, rgba(0,0,0,0.08) 0, transparent 12%),
+                radial-gradient(circle at 40% 80%, rgba(0,0,0,0.08) 0, transparent 10%);
+            min-height: 100vh;
+        }
+
+        /* The environment banner along the top */
+        .banner {
+            background: @Config["AppSettings:Color"];
+            color: white;
+            padding: 14px 24px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .content {
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #fff8e1;
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.4);
+            font-size: 2.4rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    @* The banner is a DEV/TEST/STAGING/RELEASE helper only.
+       Real users on the live site (main branch, Production environment)
+       should never see internal debug info like this, so we hide it. *@
+    @if (!Env.IsProduction())
+    {
+        <div class="banner">
+            Environment: @Env.EnvironmentName | @Config["AppSettings:Label"]
+        </div>
+    }
+
+    <div class="content">@RenderBody()</div>
+</body>
+</html>

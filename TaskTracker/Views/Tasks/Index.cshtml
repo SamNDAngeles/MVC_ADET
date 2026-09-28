@@ -1,0 +1,150 @@
+@* ===================================================================
+   VIEW = what the USER SEES (HTML + a little C#).
+   Sticky-pad UI: each task is drawn as its own colored sticky note.
+   =================================================================== *@
+@model List<TaskItem>
+
+<h1>&#128204; My Sticky Tasks</h1>
+
+@* --- Add-task note: looks like a blank sticky waiting to be filled --- *@
+<form class="add-note" asp-action="Create" method="post">
+    <input type="text" name="title" placeholder="Write a new task..." required />
+    @* >>> EDIT HERE (branch: feature/task-priority)
+           Add a <select name="priority"> dropdown here *@
+    <button type="submit">Pin it &#128204;</button>
+</form>
+
+@* --- The corkboard grid of sticky notes --- *@
+<div class="board">
+    @{
+        // Rotate through a few sticky-note colors so the board looks varied.
+        string[] colors = { "yellow", "pink", "blue", "green", "orange" };
+    }
+    @foreach (var t in Model)
+    {
+        // Pick a color based on the task Id, so each note keeps its color
+        var colorClass = colors[t.Id % colors.Length];
+        <div class="note @colorClass @(t.IsDone ? "done" : "")">
+            <div class="pin">&#128204;</div>
+            <p class="note-text">@t.Title</p>
+            @* >>> EDIT HERE (feature/task-priority or feature/due-dates)
+                   Add a small label/line here for the new field *@
+            <div class="note-actions">
+                <form asp-action="Toggle" method="post">
+                    <input type="hidden" name="id" value="@t.Id" />
+                    <button type="submit" class="btn-toggle">@(t.IsDone ? "Undo" : "Done")</button>
+                </form>
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@t.Id" />
+                    <button type="submit" class="btn-delete">&#10005;</button>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    /* The "add task" bar, styled like a blank note strip */
+    .add-note {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 35px;
+    }
+    .add-note input {
+        font-family: inherit;
+        font-size: 1.1rem;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 4px;
+        width: 300px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .add-note button {
+        font-family: inherit;
+        font-size: 1.05rem;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 4px;
+        background: #333;
+        color: white;
+        cursor: pointer;
+    }
+    .add-note button:hover { background: #555; }
+
+    /* The corkboard grid */
+    .board {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        justify-content: center;
+    }
+
+    /* One sticky note */
+    .note {
+        width: 190px;
+        min-height: 150px;
+        padding: 18px 14px 14px;
+        border-radius: 2px;
+        box-shadow: 3px 5px 10px rgba(0,0,0,0.35);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.15s ease;
+    }
+    .note:nth-child(odd)  { transform: rotate(-3deg); }
+    .note:nth-child(even) { transform: rotate(2deg); }
+    .note:hover { transform: scale(1.05) rotate(0deg); z-index: 2; }
+
+    /* Sticky note colors */
+    .note.yellow { background: #fff59d; }
+    .note.pink   { background: #f8bbd0; }
+    .note.blue   { background: #b3e5fc; }
+    .note.green  { background: #c8e6c9; }
+    .note.orange { background: #ffe0b2; }
+
+    /* Pin icon at the top of each note */
+    .pin {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.4rem;
+        filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.5));
+    }
+
+    .note-text {
+        font-size: 1.15rem;
+        margin: 6px 0 14px;
+        word-wrap: break-word;
+        color: #333;
+    }
+
+    /* Finished tasks: crossed out and faded, like a note about to be tossed */
+    .note.done {
+        opacity: 0.55;
+    }
+    .note.done .note-text {
+        text-decoration: line-through;
+    }
+
+    .note-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .note-actions form { display: inline; }
+    .btn-toggle, .btn-delete {
+        font-family: inherit;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 9px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+    .btn-toggle { background: #333; color: white; }
+    .btn-toggle:hover { background: #555; }
+    .btn-delete { background: #d32f2f; color: white; font-weight: bold; }
+    .btn-delete:hover { background: #b71c1c; }
+</style>
